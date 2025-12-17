@@ -3,173 +3,561 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Jewellery Management - Login</title>
+    <title>SJM | Secure Jewellery Management</title>
+    <meta name="description" content="The definitive platform for high-value asset management and AI design.">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
     <style>
-        /* General Reset */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* --- 1. DESIGN TOKENS (2025 Luxury Palette) --- */
+        :root {
+            --gold-primary: #d4af37;
+            --gold-light: #f9e5b9;
+            --gold-dark: #aa8c2c;
+            --bg-dark: #050505;
+            --panel-dark: #121212;
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --glass-bg: rgba(18, 18, 18, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+            --glow-color: rgba(212, 175, 55, 0.15);
         }
 
-        /* Background & Centering */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        
         body {
-            background-color: #1a1a1a; /* Dark background for upscale look  */
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
         }
 
-        /* Login Container */
-        .login-container {
-            background-color: #2c2c2c;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            max-width: 400px;
-            border-top: 4px solid #d4af37; /* Gold accent for Jewelry theme  */
+        /* --- 2. PRELOADER --- */
+        #preloader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+            flex-direction: column;
+            transition: opacity 0.8s ease;
+        }
+        .loader-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem; color: var(--gold-primary);
+            margin-bottom: 20px; animation: pulse 2s infinite;
+        }
+        .loader-bar {
+            width: 150px; height: 2px; background: #333;
+            position: relative; overflow: hidden;
+        }
+        .loader-progress {
+            position: absolute; left: 0; top: 0; height: 100%; width: 0%;
+            background: var(--gold-primary);
+            animation: load 2s ease-out forwards;
         }
 
-        /* Header */
-        .login-container h2 {
-            text-align: center;
-            margin-bottom: 25px;
-            color: #d4af37; /* Gold text */
-            font-weight: 300;
+        /* --- 3. VIDEO BACKGROUND --- */
+        .video-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            z-index: -2; overflow: hidden;
+        }
+        #bgVideo {
+            width: 100%; height: 100%; object-fit: cover;
+            transform: scale(1.1); filter: brightness(0.6);
+        }
+        .video-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background: radial-gradient(circle at center, rgba(0,0,0,0.3) 0%, var(--bg-dark) 90%);
+            z-index: -1; pointer-events: none;
+        }
+
+        /* --- 4. NAVIGATION --- */
+        .navbar {
+            position: fixed; top: 0; left: 0; width: 100%;
+            padding: 20px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 100; transition: 0.4s var(--ease-out);
+        }
+        .navbar.scrolled {
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(15px);
+            padding: 15px 40px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .brand-group { display: flex; align-items: center; gap: 15px; }
+        .brand-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem; font-weight: 700;
+            color: var(--gold-primary); text-decoration: none;
             letter-spacing: 1px;
         }
-
-        /* Form Groups */
-        .form-group {
-            margin-bottom: 20px;
+        
+        /* Time & Location Widget */
+        .system-status {
+            display: flex; gap: 15px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem; color: var(--text-muted);
+            border-left: 1px solid #333; padding-left: 15px;
         }
+        .status-item { display: flex; align-items: center; gap: 6px; }
+        .status-item i { color: var(--gold-primary); font-size: 0.8rem; }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-            color: #ccc;
+        .nav-center { display: flex; gap: 30px; }
+        .nav-link {
+            color: var(--text-main); text-decoration: none;
+            font-size: 0.9rem; font-weight: 500;
+            position: relative; opacity: 0.8; transition: 0.3s;
         }
-
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #444;
-            border-radius: 4px;
-            background-color: #333;
-            color: #fff;
-            font-size: 1rem;
+        .nav-link::after {
+            content: ''; position: absolute; bottom: -5px; left: 0;
+            width: 0%; height: 1px; background: var(--gold-primary);
+            transition: 0.3s;
         }
+        .nav-link:hover { opacity: 1; color: var(--gold-primary); }
+        .nav-link:hover::after { width: 100%; }
 
-        .form-group input:focus {
-            outline: none;
-            border-color: #d4af37;
+        .nav-right { display: flex; gap: 15px; align-items: center; }
+        .btn-nav {
+            padding: 10px 25px; border: 1px solid var(--glass-border);
+            border-radius: 50px; background: rgba(255,255,255,0.05);
+            color: #fff; font-size: 0.85rem; cursor: pointer;
+            transition: 0.3s; backdrop-filter: blur(5px);
         }
+        .btn-nav.primary {
+            background: var(--gold-primary); color: #000; border-color: var(--gold-primary);
+            font-weight: 600;
+        }
+        .btn-nav:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
 
-        /* OTP Section [cite: 159, 315] */
-        .otp-section {
-            display: flex;
-            gap: 10px;
+        /* Mobile Menu Button */
+        .menu-toggle { display: none; font-size: 1.5rem; color: #fff; cursor: pointer; }
+
+        /* --- 5. HERO SECTION --- */
+        .hero {
+            height: 100vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center; padding: 0 20px; position: relative;
         }
         
-        .otp-btn {
-            background-color: #444;
-            color: #fff;
-            border: 1px solid #d4af37;
-            padding: 0 15px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            border-radius: 4px;
-            transition: background 0.3s;
+        .hero-label {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--gold-primary); font-size: 0.8rem;
+            margin-bottom: 20px; letter-spacing: 2px;
+            opacity: 0; animation: fadeUp 1s 2.2s forwards;
         }
 
-        .otp-btn:hover {
-            background-color: #d4af37;
-            color: #1a1a1a;
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3.5rem, 8vw, 6.5rem);
+            line-height: 1.1; margin-bottom: 25px;
+            background: linear-gradient(135deg, #fff 30%, var(--gold-primary) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            opacity: 0; animation: fadeUp 1s 2.4s forwards;
         }
 
-        /* Action Buttons  */
-        .action-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
+        .hero p {
+            font-size: 1.1rem; color: #ccc; max-width: 650px;
+            margin-bottom: 40px; font-weight: 300; line-height: 1.6;
+            opacity: 0; animation: fadeUp 1s 2.6s forwards;
         }
 
-        .btn {
-            padding: 10px 25px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: bold;
-            transition: opacity 0.3s;
+        /* --- 6. GLOW CARDS (Features) --- */
+        .features { padding: 120px 8%; background: var(--bg-dark); position: relative; z-index: 2; }
+        
+        .grid-container {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
         }
 
-        .btn-login {
-            background-color: #d4af37; /* Gold */
-            color: #1a1a1a;
-            flex-grow: 1;
-            margin-right: 10px;
+        .card {
+            background: var(--panel-dark); border-radius: 12px;
+            padding: 40px; border: 1px solid var(--glass-border);
+            position: relative; cursor: default;
+            transition: transform 0.3s; overflow: hidden;
         }
-
-        .btn-reset {
-            background-color: #555;
-            color: #fff;
+        
+        /* The Glow Effect */
+        .card::before {
+            content: ""; position: absolute;
+            height: 100%; width: 100%; left: 0; top: 0;
+            background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(212, 175, 55, 0.06), transparent 40%);
+            z-index: 1; opacity: 0; transition: opacity 0.5s; pointer-events: none;
         }
+        .card:hover::before { opacity: 1; }
+        .card:hover { border-color: rgba(212, 175, 55, 0.3); transform: translateY(-5px); }
 
-        .btn:hover {
-            opacity: 0.9;
+        .card-content { position: relative; z-index: 2; }
+        .icon-box {
+            width: 50px; height: 50px; background: rgba(212, 175, 55, 0.1);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            color: var(--gold-primary); font-size: 1.2rem; margin-bottom: 25px;
         }
+        .card h3 { font-family: 'Playfair Display'; font-size: 1.4rem; margin-bottom: 10px; color: #fff; }
+        .card p { color: #888; font-size: 0.95rem; line-height: 1.6; }
 
-        /* Footer */
-        .footer {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 0.8rem;
-            color: #777;
+        /* --- 7. FOOTER & CHAT --- */
+        footer {
+            background: #000; padding: 60px 8%; border-top: 1px solid #1a1a1a;
+            display: flex; justify-content: space-between; align-items: flex-end;
+            position: relative; z-index: 2;
+        }
+        .footer-left h2 { color: var(--gold-primary); font-family: 'Playfair Display'; margin-bottom: 10px; }
+        .footer-left p { color: #555; font-size: 0.9rem; }
+        .footer-links a { color: #666; text-decoration: none; margin-left: 20px; font-size: 0.9rem; transition: 0.3s; }
+        .footer-links a:hover { color: #fff; }
+
+        .chat-widget {
+            position: fixed; bottom: 30px; right: 30px;
+            width: 60px; height: 60px; background: var(--gold-primary);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: #000; font-size: 1.5rem; cursor: pointer;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+            z-index: 90; transition: 0.3s;
+        }
+        .chat-widget:hover { transform: scale(1.1); }
+
+        /* --- 8. MODALS --- */
+        .modal {
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.8);
+            justify-content: center; align-items: center; backdrop-filter: blur(8px);
+        }
+        .modal-content {
+            width: 100%; max-width: 400px; padding: 40px; background: #161616;
+            border: 1px solid #333; border-radius: 12px; position: relative;
+            animation: slideUp 0.4s var(--ease-out);
+        }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; color: #666; font-size: 0.8rem; margin-bottom: 8px; font-family: 'JetBrains Mono'; }
+        .input-group input {
+            width: 100%; padding: 14px; background: #0a0a0a; border: 1px solid #222;
+            color: #fff; border-radius: 6px; outline: none; transition: 0.3s;
+        }
+        .input-group input:focus { border-color: var(--gold-primary); }
+        .btn-full {
+            width: 100%; padding: 14px; background: var(--gold-primary);
+            border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
+        }
+        .close-btn { position: absolute; top: 20px; right: 20px; color: #fff; cursor: pointer; }
+
+        /* --- 9. MOBILE MENU --- */
+        .mobile-menu {
+            position: fixed; top: 0; right: -100%; width: 300px; height: 100%;
+            background: #111; z-index: 99; padding: 100px 40px;
+            transition: 0.4s ease; border-left: 1px solid #222;
+        }
+        .mobile-menu.active { right: 0; }
+        .mobile-menu a { display: block; color: #fff; text-decoration: none; font-size: 1.2rem; margin-bottom: 20px; }
+
+        /* ANIMATIONS */
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        @keyframes load { 0% { width: 0%; } 100% { width: 100%; } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .nav-center, .nav-right { display: none; }
+            .menu-toggle { display: block; }
+            .system-status { display: none; } /* Hide clock on mobile to save space */
         }
     </style>
 </head>
 <body>
 
-    <div class="login-container">
-        <h2>Secure Jewellery Management</h2>
-        
-        <form action="login.php" method="POST">
-            
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="Enter your username" required>
-            </div>
+    <div id="preloader">
+        <div class="loader-logo">SJM</div>
+        <div class="loader-bar"><div class="loader-progress"></div></div>
+    </div>
 
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Enter your password" required>
-            </div>
+    <div class="video-container">
+        <video autoplay muted loop playsinline id="bgVideo">
+            <source src="assets/v1.mp4" type="video/mp4">
+        </video>
+        <div class="video-overlay"></div>
+    </div>
 
-            <div class="form-group">
-                <label for="otp">One-Time Password (OTP)</label>
-                <div class="otp-section">
-                    <input type="text" id="otp" name="otp" placeholder="Enter OTP code" required>
-                    <button type="button" class="otp-btn">Send OTP</button>
+    <nav class="navbar" id="navbar">
+        <div class="brand-group">
+            <a href="#" class="brand-logo">SJM.</a>
+            <div class="system-status">
+                <div class="status-item">
+                    <i class="fa-regular fa-clock"></i>
+                    <span id="liveTime">00:00:00</span>
+                </div>
+                <div class="status-item">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span id="liveLoc">System Node</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-center">
+            <a href="#features" class="nav-link">Features</a>
+            <a href="#studio" class="nav-link" style="color:var(--gold-primary)">Design Studio</a>
+            <a href="#security" class="nav-link">Security</a>
+        </div>
+
+        <div class="nav-right">
+            <button class="btn-nav" onclick="openModal('loginModal')">Login</button>
+            <button class="btn-nav primary" onclick="openModal('registerModal')">Get Access</button>
+        </div>
+
+        <div class="menu-toggle" onclick="toggleMobileMenu()">
+            <i class="fa-solid fa-bars"></i>
+        </div>
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="#" onclick="toggleMobileMenu()">Home</a>
+        <a href="#features" onclick="toggleMobileMenu()">Features</a>
+        <a href="#studio" onclick="toggleMobileMenu()">Custom Design</a>
+        <a href="#" onclick="openModal('loginModal')">Login</a>
+        <a href="#" onclick="openModal('registerModal')">Register</a>
+    </div>
+
+    <section class="hero">
+        <div class="hero-label">SYSTEM V2.5 ONLINE</div>
+        <h1>Secure Assets.<br>Design Futures.</h1>
+        <p>A military-grade ecosystem for jewellery management. Verify locker integrity, track live inventory, and <strong>create bespoke pieces with our AI Design Engine.</strong></p>
+        <div class="hero-btns" style="opacity: 0; animation: fadeUp 1s 2.8s forwards; display: flex; gap: 20px;">
+            <button class="btn-nav primary" style="padding: 15px 40px; font-size: 1rem;" onclick="openModal('loginModal')">Enter Portal</button>
+            <button class="btn-nav" style="padding: 15px 40px; font-size: 1rem;" onclick="openModal('registerModal')">Request Demo</button>
+        </div>
+    </section>
+
+    <section class="features" id="features" onmousemove="handleMouseMove(event)">
+        <div style="text-align: center; margin-bottom: 60px;">
+            <span style="color:var(--gold-primary); font-family:'JetBrains Mono'; font-size:0.8rem;">ARCHITECTURE</span>
+            <h2 style="font-family:'Playfair Display'; font-size:3rem; margin-top:10px;">Core Modules</h2>
+        </div>
+
+        <div class="grid-container">
+            <div class="card" id="studio">
+                <div class="card-content">
+                    <div class="icon-box"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                    <h3>AI Custom Studio</h3>
+                    <p><strong>New Feature:</strong> Empower clients to generate unique jewellery concepts instantly. Our AI engine visualizes custom cuts, settings, and metals in real-time.</p>
                 </div>
             </div>
 
-            <div class="action-buttons">
-                <button type="submit" class="btn btn-login">Login</button>
-                <button type="reset" class="btn btn-reset">Reset</button>
+            <div class="card">
+                <div class="card-content">
+                    <div class="icon-box"><i class="fa-solid fa-vault"></i></div>
+                    <h3>Locker Verification</h3>
+                    <p>Visual proof-of-storage protocols. Require before/after photographic evidence for every secure vault interaction.</p>
+                </div>
             </div>
+            
+            <div class="card">
+                <div class="card-content">
+                    <div class="icon-box"><i class="fa-solid fa-gem"></i></div>
+                    <h3>Inventory AI</h3>
+                    <p>Granular tracking of carat weight, metal purity, and depreciation. Automated low-stock alerts and valuation reports.</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-content">
+                    <div class="icon-box"><i class="fa-solid fa-truck-fast"></i></div>
+                    <h3>Smart Logistics</h3>
+                    <p>Supplier reliability scoring based on delivery speed and accuracy. Digital invoice processing and dispute resolution.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        </form>
-        
-        <div class="footer">
-            &copy; 2025 Secure Jewellery Management System
+    <footer>
+        <div class="footer-left">
+            <h2>SJM.</h2>
+            <p>Secure Jewellery Management Systems &copy; 2025<br>Colombo, Sri Lanka </p>
+        </div>
+        <div class="footer-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">System Status: Operational</a>
+        </div>
+    </footer>
+
+    <div class="chat-widget" onclick="alert('Support agents are currently offline. Please leave a message.')">
+        <i class="fa-solid fa-comment-dots"></i>
+    </div>
+
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('loginModal')"><i class="fa-solid fa-xmark"></i></span>
+            <h2 style="text-align: left; margin-bottom: 10px;">Welcome Back</h2>
+            <p style="color:#666; font-size: 0.9rem; margin-bottom: 30px;">Authenticate to access the vault.</p>
+            
+            <form id="loginForm">
+                <div class="input-group">
+                    <label>ACCESS ID / EMAIL</label>
+                    <input type="text" id="loginUsername" required>
+                </div>
+                <div class="input-group">
+                    <label>PASSPHRASE</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn-full" id="loginBtn">INITIALIZE SESSION</button>
+                <div id="loginMsg" style="margin-top:15px; font-size:0.85rem; color:#ff5252;"></div>
+            </form>
         </div>
     </div>
 
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('registerModal')"><i class="fa-solid fa-xmark"></i></span>
+            <h2 style="text-align: left; margin-bottom: 10px;">Request Access</h2>
+            <p style="color:#666; font-size: 0.9rem; margin-bottom: 30px;">Join the secure network.</p>
+            
+            <form id="registerForm">
+                <div class="input-group">
+                    <label>PREFERRED ID</label>
+                    <input type="text" id="regUsername" required>
+                </div>
+                <div class="input-group">
+                    <label>OFFICIAL EMAIL</label>
+                    <input type="email" id="regEmail" required>
+                </div>
+                <div class="input-group">
+                    <label>SET PASSPHRASE</label>
+                    <input type="password" id="regPassword" required>
+                </div>
+                <button type="submit" class="btn-full">SUBMIT APPLICATION</button>
+                <div id="regMsg" style="margin-top:15px; font-size:0.85rem; color:#ff5252;"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API = 'api';
+
+        // 1. PRELOADER FADE
+        window.onload = () => {
+            setTimeout(() => {
+                const loader = document.getElementById('preloader');
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 800);
+            }, 2000); // 2 second simulated load
+        };
+
+        // 2. LIVE TIME & LOCATION (Non-invasive)
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('liveTime').innerText = now.toLocaleTimeString('en-US', {hour12: false});
+            
+            // Auto-detect timezone city for location (No permission needed)
+            try {
+                const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                const city = tz.split('/')[1].replace('_', ' ');
+                document.getElementById('liveLoc').innerText = city.toUpperCase();
+            } catch(e) {
+                document.getElementById('liveLoc').innerText = "SECURE NODE";
+            }
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // 3. MOUSE TRACKING GLOW
+        function handleMouseMove(e) {
+            const cards = document.getElementsByClassName("card");
+            for(const card of cards) {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty("--mouse-x", `${x}px`);
+                card.style.setProperty("--mouse-y", `${y}px`);
+            }
+        }
+
+        // 4. MOBILE MENU
+        function toggleMobileMenu() {
+            document.getElementById('mobileMenu').classList.toggle('active');
+        }
+
+        // 5. MODAL LOGIC
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        window.onclick = (e) => { if(e.target.classList.contains('modal')) e.target.style.display='none'; };
+
+        // 6. LOGIN HANDLER
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            const msg = document.getElementById('loginMsg');
+            
+            btn.innerHTML = 'VERIFYING CREDENTIALS...';
+            btn.style.opacity = '0.7';
+
+            const data = {
+                username: document.getElementById('loginUsername').value,
+                password: document.getElementById('loginPassword').value
+            };
+
+            try {
+                const res = await fetch(`${API}/auth_login.php`, {
+                    method: 'POST', body: JSON.stringify(data), headers: {'Content-Type': 'application/json'}
+                });
+                const result = await res.json();
+                
+                if (result.status === 'success') {
+                    msg.style.color = '#4caf50';
+                    msg.innerText = 'ACCESS GRANTED. REDIRECTING...';
+                    setTimeout(() => window.location.href = result.redirect, 1000);
+                } else {
+                    msg.style.color = '#ff5252';
+                    msg.innerText = result.message || 'ACCESS DENIED';
+                    btn.innerHTML = 'INITIALIZE SESSION';
+                    btn.style.opacity = '1';
+                }
+            } catch (err) {
+                msg.innerText = 'SERVER CONNECTION ERROR';
+                btn.innerHTML = 'INITIALIZE SESSION';
+            }
+        });
+
+        // 7. REGISTER HANDLER
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msg = document.getElementById('regMsg');
+            const data = {
+                username: document.getElementById('regUsername').value,
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPassword').value
+            };
+
+            try {
+                const res = await fetch(`${API}/auth_register.php`, {
+                    method: 'POST', body: JSON.stringify(data), headers: {'Content-Type': 'application/json'}
+                });
+                const result = await res.json();
+
+                if (result.status === 'success') {
+                    msg.style.color = '#4caf50';
+                    msg.innerText = 'APPLICATION LOGGED SUCCESSFULLY.';
+                    setTimeout(() => {
+                        closeModal('registerModal'); openModal('loginModal');
+                        document.getElementById('loginUsername').value = data.username;
+                    }, 1500);
+                } else {
+                    msg.style.color = '#ff5252';
+                    msg.innerText = result.message;
+                }
+            } catch (err) {
+                msg.innerText = 'SERVER CONNECTION ERROR';
+            }
+        });
+
+        // 8. SCROLL NAV EFFECT
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if(window.scrollY > 50) nav.classList.add('scrolled');
+            else nav.classList.remove('scrolled');
+        });
+    </script>
 </body>
 </html>
